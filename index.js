@@ -23,6 +23,13 @@ const connectToDB = await connectToMongoDB()
 const db = connectToDB.db("HireLoop")
 const users = db.collection("user")
 
+// get users
+app.get('/users', async(req, res) => {
+  const cursor = users.find({});
+  const result = await cursor.toArray();
+  res.send(result)
+})
+
 app.get('/', (req, res) => {
     res.send("Server Is Running Perfectly!")
 })
