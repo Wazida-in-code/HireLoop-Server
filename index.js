@@ -22,6 +22,16 @@ export async function connectToMongoDB() {
 const connectToDB = await connectToMongoDB()
 const db = connectToDB.db("HireLoop")
 const users = db.collection("user")
+const jobs = db.collection("jobs")
+
+// get job in database
+app.post('/jobs', async(req, res) => {
+    const data = req.body
+    const result = await jobs.insertOne(data)
+    res.send(result)
+})
+
+
 
 // get users
 app.get('/users', async(req, res) => {
