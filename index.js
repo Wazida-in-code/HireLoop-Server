@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 8000
 app.use(express.json());
 app.use(cors());
 
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 const client = new MongoClient(process.env.MONGO_DB_CLIENT_URI);
 export async function connectToMongoDB() {
   try {
@@ -38,6 +38,13 @@ app.get('/jobs', async(req, res) => {
   res.send(result)
 })
 
+// delete job
+app.delete('/jobs/:id', async(req, res) => {
+  const {id} = req.params
+  const query = {_id: new ObjectId(id)}
+  const result = await jobs.deleteOne(query)
+  res.json(result)
+})
 
 
 // get users
