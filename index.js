@@ -31,6 +31,13 @@ app.post('/jobs', async(req, res) => {
     res.send(result)
 })
 
+// get all jobs
+app.get('/jobs', async(req, res) => {
+  const cursor = jobs.find();
+  const result = await cursor.toArray();
+  res.send(result)
+})
+
 
 
 // get users
