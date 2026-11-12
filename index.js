@@ -68,11 +68,22 @@ app.get('/jobs/:id' , async (req, res) => {
     res.send(result)
 })
 
-
+// insert apply now btn's user's info
 app.post('/applications', async(req, res) => {
   const application = req.body
   const result = await applications.insertOne(application)
   res.send(result);
+})
+
+
+app.get('/applications', async(req, res) => {
+  const query = {}
+  if(req.query.userId){
+    query.userId = req.query.userId
+  }
+  const cursor = applications.find(query);
+  const result = await cursor.toArray();
+  res.send(result)
 })
 
 
