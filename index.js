@@ -49,7 +49,8 @@ app.get('/jobs', async(req, res) => {
       query.$or = [
         {title: {$regex: req.query.search, $options: 'i'}},
         {description: {$regex: req.query.search, $options: 'i'}},
-        {requirements: {$regex: req.query.search, $options: 'i'}}
+        {requirements: {$regex: req.query.search, $options: 'i'}},
+        {company: {$regex: req.query.search, $options: 'i'}}
       ]
     }
   }
@@ -57,6 +58,16 @@ app.get('/jobs', async(req, res) => {
   const result = await cursor.toArray();
   res.send(result)
 })
+
+
+// get job by id
+app.get('/jobs/:id' , async (req, res) => {
+    const {id} = req.params 
+    const result = await jobs.findOne({_id: new ObjectId(id)})   
+    res.send(result)
+})
+
+
 
 // delete job
 app.delete('/jobs/:id', async(req, res) => {
