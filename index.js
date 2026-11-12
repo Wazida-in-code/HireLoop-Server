@@ -23,6 +23,7 @@ const connectToDB = await connectToMongoDB()
 const db = connectToDB.db("HireLoop")
 const users = db.collection("user")
 const jobs = db.collection("jobs")
+const applications = db.collection("applications")
 
 // get job in database
 app.post('/jobs', async(req, res) => {
@@ -67,6 +68,12 @@ app.get('/jobs/:id' , async (req, res) => {
     res.send(result)
 })
 
+
+app.post('/applications', async(req, res) => {
+  const application = req.body
+  const result = await applications.insertOne(application)
+  res.send(result);
+})
 
 
 // delete job
