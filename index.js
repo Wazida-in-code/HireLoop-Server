@@ -104,18 +104,28 @@ app.get('/applications/count', async(req, res) => {
 // payment verification
 app.post('/payments/checkout-verify', async(req, res) =>{
   const {sessionId} = req.body
+  if(!sessionId){
+    return res.send({success: false, msg: "Session Id is required"})
+  }
   const {status,
     payment_status,
     customer_email, 
     metadata,
     payment_intent} = await stripe.checkout.sessions.retrieve(sessionId);
-    
+
     // 1. is used new session 
     // 2. check is the session id for the currently logged in user
     // 3. insert sessionId into the payment Collection
     // 4. update user information as premium user
 
     if (status === 'complete' && payment_status=='paid'){
+
+      const sessionQuery = {sessionId}
+      const existingPayment = await payments.findOne(sessionQuery)
+      if(existingPayment){
+        return res.send({success: false, msg: "Payment already exist"})
+      }
+
       const payment = {
         sessionId,
         status,
