@@ -86,6 +86,15 @@ app.get('/applications', async(req, res) => {
   res.send(result)
 })
 
+app.get('/applications/count', async(req, res) => {
+  const query = {}
+  if(req.query.userId){
+    query.userId = req.query.userId
+  }
+  const result = await applications.countDocuments(query)
+  res.send({count : result})
+})
+
 
 // delete job
 app.delete('/jobs/:id', async(req, res) => {
