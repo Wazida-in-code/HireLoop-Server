@@ -1,11 +1,14 @@
 import express from 'express'
 import 'dotenv/config'
 import cors from 'cors'
+import Stripe from 'stripe'
 
 const app = express()
 const PORT = process.env.PORT || 8000
 app.use(express.json());
 app.use(cors());
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 import { MongoClient, ObjectId } from 'mongodb';
 const client = new MongoClient(process.env.MONGO_DB_CLIENT_URI);
@@ -24,6 +27,7 @@ const db = connectToDB.db("HireLoop")
 const users = db.collection("user")
 const jobs = db.collection("jobs")
 const applications = db.collection("applications")
+const payments = db.collection("payments")
 
 // get job in database
 app.post('/jobs', async(req, res) => {
@@ -75,7 +79,7 @@ app.post('/applications', async(req, res) => {
   res.send(result);
 })
 
-
+// all application
 app.get('/applications', async(req, res) => {
   const query = {}
   if(req.query.userId){
@@ -86,6 +90,7 @@ app.get('/applications', async(req, res) => {
   res.send(result)
 })
 
+// how many application are there
 app.get('/applications/count', async(req, res) => {
   const query = {}
   if(req.query.userId){
@@ -93,6 +98,51 @@ app.get('/applications/count', async(req, res) => {
   }
   const result = await applications.countDocuments(query)
   res.send({count : result})
+})
+
+
+// payment verification
+app.post('/payments/checkout-verify', async(req, res) =>{
+  const {sessionId} = req.body
+  const {status,
+    payment_status,
+    customer_email, 
+    metadata,
+    payment_intent} = await stripe.checkout.sessions.retrieve(sessionId);
+    
+    // 1. is used new session 
+    // 2. check is the session id for the currently logged in user
+    // 3. insert sessionId into the payment Collection
+    // 4. update user information as premium user
+
+    if (status === 'complete' && payment_status=='paid'){
+      const payment = {
+        sessionId,
+        status,
+        payment_status,
+        customer_email, 
+        userId: metadata.userId,
+        payment_date: new Date(),
+        payment_intent
+      }
+      const result = await payments.insertOne(payment)
+
+      // update the user 
+      const query = {_id: new ObjectId(metadata.userId)}
+      const updatedInfo = {
+        $set : {
+          premium: true
+        }
+      }
+      const updateResult = await users.updateOne(
+        query,
+        updatedInfo
+      )
+      res.send({success: true, result, updateResult})
+      return
+    }
+
+    res.send({success: false , msg: "Payment failed!"})
 })
 
 
