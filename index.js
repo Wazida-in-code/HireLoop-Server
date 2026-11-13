@@ -50,6 +50,9 @@ app.get('/jobs', async(req, res) => {
     if(req.query.category){
       query.category = req.query.category
     }
+    if(req.query.recruiterId){
+      query.recruiterId = req.query.recruiterId
+    }
     if(req.query.search){
       query.$or = [
         {title: {$regex: req.query.search, $options: 'i'}},
@@ -154,6 +157,14 @@ app.post('/payments/checkout-verify', async(req, res) =>{
 
     res.send({success: false , msg: "Payment failed!"})
 })
+
+
+// app.get('/users/:id/premium', async(req, res) => {
+//   const {id} = req.params
+//   const query = {_id: new ObjectId(id)}
+//   const result = await users.findOne(query, {projection: {premium: 1}})
+//   res.send({result})
+// })
 
 
 // delete job
