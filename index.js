@@ -185,6 +185,20 @@ app.get('/users/:id/premium', async(req, res) => {
 })
 
 
+// update user role
+app.patch('/users/:id/role', async(req, res) => {
+  const {id} = req.params
+  const query = {_id: new ObjectId(id)}
+  const updatedDoc = {
+    $set: {
+      role: req.body.role,
+    }
+  }
+  const result = await users.updateOne(query, updatedDoc)
+  res.send(result)
+})
+
+
 // delete job
 app.delete('/jobs/:id', async(req, res) => {
   const {id} = req.params
