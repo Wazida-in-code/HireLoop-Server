@@ -88,6 +88,9 @@ app.get('/applications', async(req, res) => {
   if(req.query.userId){
     query.userId = req.query.userId
   }
+  if(req.query.jobId){
+    query.jobId = req.query.jobId
+  }
   const cursor = applications.find(query);
   const result = await cursor.toArray();
   res.send(result)
@@ -159,12 +162,12 @@ app.post('/payments/checkout-verify', async(req, res) =>{
 })
 
 
-// app.get('/users/:id/premium', async(req, res) => {
-//   const {id} = req.params
-//   const query = {_id: new ObjectId(id)}
-//   const result = await users.findOne(query, {projection: {premium: 1}})
-//   res.send({result})
-// })
+app.get('/users/:id/premium', async(req, res) => {
+  const {id} = req.params
+  const query = {_id: new ObjectId(id)}
+  const result = await users.findOne(query, {projection: {premium: 1}})
+  res.send(result)
+})
 
 
 // delete job
