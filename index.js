@@ -82,6 +82,21 @@ app.post('/applications', async(req, res) => {
   res.send(result);
 })
 
+
+// update application's status
+app.patch('/applications/:id', async(req, res) => {
+  const {id} = req.params
+  const query = {_id: new ObjectId(id)}
+  const updatedDoc = {
+    $set: {
+      status: req.body.status,
+    }
+  }
+  const result = await applications.updateOne(query, updatedDoc)
+  res.send(result)
+})
+
+
 // all application
 app.get('/applications', async(req, res) => {
   const query = {}
