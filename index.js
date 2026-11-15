@@ -191,7 +191,8 @@ app.patch('/users/:id/role', async(req, res) => {
   const query = {_id: new ObjectId(id)}
   const updatedDoc = {
     $set: {
-      role: req.body.role,
+      userRole: req.body.role,
+      role: req.body.role === "admin" ? "admin" : "user"
     }
   }
   const result = await users.updateOne(query, updatedDoc)
