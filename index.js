@@ -14,17 +14,38 @@ const myLogger = (req, res, next) => {
 }
 
 
-const verifyToken = (req, res, next) => {
+const verifyToken = async(req, res, next) => {
+  // find header
   const authHeader = req.headers.authorization;
   if(!authHeader){
-    res.send({status: 401, message: 'unauthorized'});
+    res.status(401).send({message: 'unauthorized'});
     return;
   }
+  // find token from header
   const token = authHeader.split(' ')[1]
   if(!token){
-    res.send({status: 401, message: 'unauthorized'});
+    res.status(401).send({message: 'unauthorized'});
     return;
   }
+  // find session from token
+  const query = {token};
+  const session = await sessions.findOne(query);
+  if(!session){
+    res.status(401).send({message: 'unauthorized'});
+    return;
+  }
+  // find user from session
+  const userId = session.userId;
+
+  const userQuery = {_id: new ObjectId(userId)};
+  const user = await users.findOne(userQuery);
+  if(!user){
+    res.status(401).send({message: 'unauthorized'});
+    return;
+  }
+
+  req.user = user;
+  next();
 }
 
 
@@ -45,6 +66,7 @@ export async function connectToMongoDB() {
 const connectToDB = await connectToMongoDB()
 const db = connectToDB.db("HireLoop")
 const users = db.collection("user")
+const sessions = db.collection("session")
 const jobs = db.collection("jobs")
 const applications = db.collection("applications")
 const payments = db.collection("payments")
@@ -123,7 +145,16 @@ app.get('/applications', verifyToken , async(req, res) => {
   if(req.query.userId){
     query.userId = req.query.userId
   }
+  console.log(req.query);
   if(req.query.jobId){
+
+    const jobQuery = {_id: new ObjectId(req.query.jobId)};
+    const job = await jobs.findOne(jobQuery);
+    if(job.recruiterId !== req.user._id.toString() && req.user.role !== 'admin'){
+      res.status(403).send({message: 'Forbidden'});  //http://localhost:3000/dashboard/recruiter/jobs/6af8a333bf4e41425f396db6/applications
+      return;
+    }
+
     query.jobId = req.query.jobId
   }
   const cursor = applications.find(query);
