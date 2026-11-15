@@ -8,6 +8,26 @@ const PORT = process.env.PORT || 8000
 app.use(express.json());
 app.use(cors());
 
+const myLogger = (req, res, next) => {
+  console.log(req.url, req.headers);
+  next()
+}
+
+
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if(!authHeader){
+    res.send({status: 401, message: 'unauthorized'});
+    return;
+  }
+  const token = authHeader.split(' ')[1]
+  if(!token){
+    res.send({status: 401, message: 'unauthorized'});
+    return;
+  }
+}
+
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 import { MongoClient, ObjectId } from 'mongodb';
@@ -98,7 +118,7 @@ app.patch('/applications/:id', async(req, res) => {
 
 
 // all application
-app.get('/applications', async(req, res) => {
+app.get('/applications', verifyToken , async(req, res) => {
   const query = {}
   if(req.query.userId){
     query.userId = req.query.userId
