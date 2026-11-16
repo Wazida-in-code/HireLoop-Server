@@ -13,7 +13,7 @@ const myLogger = (req, res, next) => {
   next()
 }
 
-
+// verify token
 const verifyToken = async(req, res, next) => {
   // find header
   const authHeader = req.headers.authorization;
@@ -49,6 +49,25 @@ const verifyToken = async(req, res, next) => {
 }
 
 
+// verify seeker
+const verifySeeker = async(req, res, next) => {
+  if(req.user.role !== 'seeker'){
+    res.status(403).send({message: 'Forbidden'});
+    return;
+  }
+  next();
+}
+
+// verify recruiter
+const verifyRecruiter = async(req, res, next) => {
+  if(req.user.role !== 'recruiter'){
+    res.status(403).send({message: 'Forbidden'});
+    return;
+  }
+  next();
+}
+
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 import { MongoClient, ObjectId } from 'mongodb';
@@ -72,7 +91,7 @@ const applications = db.collection("applications")
 const payments = db.collection("payments")
 
 // get job in database
-app.post('/jobs', async(req, res) => {
+app.post('/jobs', verifyToken, verifyRecruiter, async(req, res) => {
     const data = req.body
     const result = await jobs.insertOne(data)
     res.send(result)
@@ -118,7 +137,7 @@ app.get('/jobs/:id' , async (req, res) => {
 })
 
 // insert apply now btn's user's info
-app.post('/applications', async(req, res) => {
+app.post('/applications', verifyToken, verifySeeker, async(req, res) => {
   const application = req.body
   const result = await applications.insertOne(application)
   res.send(result);
