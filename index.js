@@ -289,7 +289,7 @@ app.delete('/jobs/:id', async(req, res) => {
 
 
 // get users
-app.get('/users', async(req, res) => {
+app.get('/users', verifyToken, verifyAdmin, async(req, res) => {
   const cursor = users.find({});
   const result = await cursor.toArray();
   res.send(result)
