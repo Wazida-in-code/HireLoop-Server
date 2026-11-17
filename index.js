@@ -51,7 +51,7 @@ const verifyToken = async(req, res, next) => {
 
 // verify seeker
 const verifySeeker = async(req, res, next) => {
-  if(req.user.role !== 'seeker'){
+  if(req.user.userRole !== 'seeker'){
     res.status(403).send({message: 'Forbidden'});
     return;
   }
@@ -60,7 +60,7 @@ const verifySeeker = async(req, res, next) => {
 
 // verify recruiter
 const verifyRecruiter = async(req, res, next) => {
-  if(req.user.role !== 'recruiter'){
+  if(req.user.userRole !== 'recruiter'){
     res.status(403).send({message: 'Forbidden'});
     return;
   }
@@ -69,7 +69,7 @@ const verifyRecruiter = async(req, res, next) => {
 
 
 const verifyAdmin = async(req, res, next) => {
-  if(req.user.role !== 'admin'){
+  if(req.user.userRole !== 'admin'){
     res.status(403).send({message: 'Forbidden'});
     return;
   }
@@ -178,7 +178,7 @@ app.get('/applications', verifyToken , async(req, res) => {
 
     const jobQuery = {_id: new ObjectId(req.query.jobId)};
     const job = await jobs.findOne(jobQuery);
-    if(job.recruiterId !== req.user._id.toString() && req.user.role !== 'admin'){
+    if(job.recruiterId !== req.user._id.toString() && req.user.userRole !== 'admin'){
       res.status(403).send({message: 'Forbidden'});  //http://localhost:3000/dashboard/recruiter/jobs/6af8a333bf4e41425f396db6/applications
       return;
     }
@@ -271,7 +271,7 @@ app.patch('/users/:id/role', verifyToken, verifyAdmin, async(req, res) => {
   const updatedDoc = {
     $set: {
       userRole: req.body.role,
-      role: req.body.role === "admin" ? "admin" : "user"
+      // role: req.body.role === "admin" ? "admin" : "user"
     }
   }
   const result = await users.updateOne(query, updatedDoc)
@@ -302,3 +302,5 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on PORT ${PORT}`);
 })
+
+export default app;
